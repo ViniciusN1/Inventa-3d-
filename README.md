@@ -4,6 +4,8 @@ Loja virtual completa para venda de peças impressas em 3D, com pagamento online
 
 Projeto pessoal desenvolvido do zero por **Vinícius Nunes**.
 
+🔗 **Loja no ar:** https://inventta-3dd.vercel.app
+
 ## Funcionalidades
 
 **Loja**
