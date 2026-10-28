@@ -61,4 +61,4 @@ Acesse http://localhost:3000
 
 ## Autor
 
-Vinícius Nunes · [LinkedIn](https://www.linkedin.com/in/vinicius-nunes-dev) · [GitHub](https://github.com/MenesesBuzzi)
+Vinícius Nunes · [LinkedIn](https://www.linkedin.com/in/vinicius-nunes-dev) · [GitHub](https://github.com/ViniciusN1)
