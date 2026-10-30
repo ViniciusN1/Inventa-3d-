@@ -3,6 +3,16 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import AddToCartButton from "@/components/AddToCartButton";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
+import type { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Produtos",
+  description:
+    "Catálogo completo de peças em impressão 3D personalizada da Inventta 3D: geek, RPG, miniaturas, decoração, chaveiros e presentes. Envio para todo o Brasil.",
+  alternates: { canonical: "/products" },
+};
 
 interface Product {
   _id: string;

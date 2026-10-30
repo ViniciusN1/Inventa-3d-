@@ -4,6 +4,49 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AddToCartButton from "@/components/AddToCartButton";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
+import type { Metadata } from "next";
+import { SITE_NAME, SITE_LOGO, STORE_CATEGORIES } from "@/lib/site";
+
+function getCategoryName(slug: string) {
+  const known = STORE_CATEGORIES.find((c) => c.slug === slug);
+  if (known) return known.name;
+  return decodeURIComponent(slug)
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const name = getCategoryName(slug);
+  const title = `${name} – Impressão 3D`;
+  const description = `Peças de ${name} em impressão 3D personalizada pela Inventta 3D, de Aquidauana-MS. Presentes, decoração e itens exclusivos com envio para todo o Brasil.`;
+  const url = `/category/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      url,
+      siteName: SITE_NAME,
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      images: [{ url: SITE_LOGO, alt: SITE_NAME }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      images: [SITE_LOGO],
+    },
+  };
+}
 
 interface Product {
   _id: string;

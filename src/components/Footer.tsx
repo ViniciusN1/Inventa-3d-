@@ -75,7 +75,7 @@ export default function Footer() {
 
           <div className="space-y-3 text-zinc-300">
             <a href="https://wa.me/5567992730601">WhatsApp: (67) 99273-0601</a>
-            <a href="https://www.instagram.com/inventta.3dd?igsh=MXZuOXl2bGc2bmxkeQ%3D%3D">Instagram: @inventta3d</a>
+            <a href="https://www.instagram.com/inventta.3dd?igsh=MXZuOXl2bGc2bmxkeQ%3D%3D">Instagram: @inventta.3dd</a>
             <p>Enviamos para todo o Brasil</p>
           </div>
         </div>

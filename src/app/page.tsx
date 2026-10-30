@@ -3,6 +3,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AddToCartButton from "@/components/AddToCartButton";
+import clientPromise, { DB_NAME } from "@/lib/mongodb";
+import { ACTIVE_PRODUCT_FILTER } from "@/lib/site";
 
 interface Product {
   _id: string;
@@ -15,29 +17,47 @@ interface Product {
   createdAt?: string;
 }
 
-async function getProducts(): Promise<Product[]> {
+export const dynamic = "force-dynamic";
+
+/**
+ * Busca os produtos em destaque direto no MongoDB (sem chamar a própria API,
+ * que no Vercel caía em http://localhost:3000 e retornava vazio).
+ * Se nenhum produto estiver marcado como destaque/novidade, usa os 5 mais recentes.
+ */
+async function getFeaturedProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/products`, {
-      cache: "no-store",
-    });
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+    const products = db.collection("products");
 
-    const data = await res.json();
+    const featured = await products
+      .find({
+        ...ACTIVE_PRODUCT_FILTER,
+        $or: [{ featured: true }, { isNew: true }],
+      })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .toArray();
 
-    return data.products || [];
-  } catch {
+    if (featured.length > 0) {
+      return JSON.parse(JSON.stringify(featured));
+    }
+
+    const newest = await products
+      .find(ACTIVE_PRODUCT_FILTER)
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .toArray();
+
+    return JSON.parse(JSON.stringify(newest));
+  } catch (error) {
+    console.error("HOME FEATURED PRODUCTS ERROR:", error);
     return [];
   }
 }
 
 export default async function Home() {
-  const products = await getProducts();
-
-  const weeklyNews = products
-    .filter((product) => product.isNew || product.featured)
-    .slice(0, 5);
-
-  const displayProducts =
-    weeklyNews.length > 0 ? weeklyNews : products.slice(0, 5);
+  const displayProducts = await getFeaturedProducts();
 
   const categories = [
     { name: "Geek", href: "/category/geek", icon: "🎮" },
@@ -224,7 +244,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* NOVIDADES DA SEMANA */}
+      {/* NOVIDADES DA SEMANA (oculta se não houver produtos) */}
+      {displayProducts.length > 0 && (
       <section id="novidades" className="max-w-7xl mx-auto py-20 px-4">
         <div className="flex items-center justify-between mb-12">
           <div>
@@ -249,13 +270,6 @@ export default async function Home() {
           </Link>
         </div>
 
-        {displayProducts.length === 0 ? (
-          <div className="bg-white/5 border border-[#B69AF8]/20 rounded-3xl p-10 text-center">
-            <p className="text-zinc-400 font-bold">
-              Nenhum produto encontrado.
-            </p>
-          </div>
-        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {displayProducts.map((product) => (
               <div key={product._id} className="group">
@@ -295,8 +309,8 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        )}
       </section>
+      )}
 
       <Footer />
     </main>
