@@ -1,6 +1,17 @@
 import Link from "next/link";
 
-export default function CheckoutSuccessPage() {
+import PaymentConfirm from "@/components/PaymentConfirm";
+
+export const dynamic = "force-dynamic";
+
+export default async function CheckoutSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const paymentId = String(params.payment_id || params.collection_id || "") || undefined;
+
   return (
     <main className="min-h-screen bg-[#07070A] text-white flex items-center justify-center px-4">
       <div className="w-full max-w-2xl bg-[#101014] border border-white/10 rounded-[2rem] p-10 text-center">
@@ -10,7 +21,7 @@ export default function CheckoutSuccessPage() {
         </div>
 
         <p className="text-pink-400 font-bold uppercase tracking-widest text-sm">
-          Pagamento confirmado
+          {paymentId ? "Pagamento recebido" : "Pagamento confirmado"}
         </p>
 
         <h1 className="text-5xl font-black mt-4">
@@ -21,6 +32,8 @@ export default function CheckoutSuccessPage() {
           Seu pedido foi registrado e já está sendo processado.
           Você poderá acompanhar a entrega e acessar conteúdos exclusivos dos produtos adquiridos.
         </p>
+
+        <PaymentConfirm paymentId={paymentId} />
 
         <div className="grid gap-4 mt-10">
 

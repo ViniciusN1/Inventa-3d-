@@ -53,13 +53,14 @@ Acesse http://localhost:3000
 |---|---|
 | `MONGODB_URI` | Conexão com o MongoDB |
 | `MONGODB_DB` | Nome do banco (padrão: `inventta3d`) |
-| `JWT_SECRET` | Assinatura dos tokens de login |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Acesso ao painel admin |
+| `JWT_SECRET` | Assinatura dos tokens de login (obrigatório: sem ele ninguém entra) |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Acesso ao painel admin (obrigatórios: se faltarem, o login admin fica bloqueado) |
 | `MERCADO_PAGO_ACCESS_TOKEN` | Token privado do Mercado Pago |
 | `NEXT_PUBLIC_MP_PUBLIC_KEY` | Chave pública do Mercado Pago |
 | `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Upload de imagens |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Envio de e-mails |
-| `NEXT_PUBLIC_SITE_URL` | URL pública do site |
+| `NEXT_PUBLIC_SITE_URL` | URL pública do site (usada nos retornos e no webhook do Mercado Pago) |
+| `MERCADOPAGO_WEBHOOK_SECRET` | Opcional: assinatura secreta do webhook do Mercado Pago; se definida, o `x-signature` é validado |
 
 ## Autor
 
