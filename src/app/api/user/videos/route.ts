@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { getUserAccount, ordersFilterForUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
@@ -62,7 +63,7 @@ export async function GET(req: Request) {
 
     return Response.json({
       success: true,
-      videos: JSON.parse(JSON.stringify(products)),
+      videos: toPublicProducts(JSON.parse(JSON.stringify(products))),
     });
   } catch (error) {
     console.log("USER VIDEOS ERROR:", error);

@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 
 export async function GET(req: Request) {
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
       .limit(5)
       .toArray();
 
-    return Response.json(products);
+    return Response.json(toPublicProducts(products));
   } catch (err) {
     console.error(err);
 

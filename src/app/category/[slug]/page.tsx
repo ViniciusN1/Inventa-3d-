@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import Link from "next/link";
 
 import Navbar from "@/components/Navbar";
@@ -87,7 +88,7 @@ async function getProductsByCategory(
     (p: any) => p.categorySlug === target || slugify(p.category) === target
   );
 
-  return JSON.parse(JSON.stringify(matches));
+  return toPublicProducts(JSON.parse(JSON.stringify(matches)));
 }
 
 export default async function CategoryPage({

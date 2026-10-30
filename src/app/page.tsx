@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import Link from "next/link";
 
 import Navbar from "@/components/Navbar";
@@ -40,7 +41,7 @@ async function getFeaturedProducts(): Promise<Product[]> {
       .toArray();
 
     if (featured.length > 0) {
-      return JSON.parse(JSON.stringify(featured));
+      return toPublicProducts(JSON.parse(JSON.stringify(featured)));
     }
 
     const newest = await products
@@ -49,7 +50,7 @@ async function getFeaturedProducts(): Promise<Product[]> {
       .limit(5)
       .toArray();
 
-    return JSON.parse(JSON.stringify(newest));
+    return toPublicProducts(JSON.parse(JSON.stringify(newest)));
   } catch (error) {
     console.error("HOME FEATURED PRODUCTS ERROR:", error);
     return [];

@@ -1,3 +1,4 @@
+import { toPublicProduct } from "@/lib/public-product";
 import { notFound } from "next/navigation";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
@@ -20,7 +21,7 @@ const getProduct = cache(async function getProduct(id: string) {
 
     if (!product) return null;
 
-    return JSON.parse(JSON.stringify(product));
+    return toPublicProduct(JSON.parse(JSON.stringify(product)));
   } catch {
     return null;
   }

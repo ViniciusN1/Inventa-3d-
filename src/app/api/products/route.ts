@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { slugify } from "@/lib/slug";
@@ -15,7 +16,7 @@ export async function GET() {
 
     return Response.json({
       success: true,
-      products,
+      products: toPublicProducts(products),
     });
   } catch (error) {
     console.error("GET PRODUCTS ERROR:", error);

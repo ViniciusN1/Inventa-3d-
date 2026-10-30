@@ -1,3 +1,4 @@
+import { toPublicProducts } from "@/lib/public-product";
 import Link from "next/link";
 
 import Navbar from "@/components/Navbar";
@@ -39,7 +40,7 @@ async function getProducts(): Promise<Product[]> {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return JSON.parse(JSON.stringify(products));
+    return toPublicProducts(JSON.parse(JSON.stringify(products)));
   } catch (error) {
     console.log("PRODUCTS PAGE ERROR:", error);
     return [];
