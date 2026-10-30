@@ -1,8 +1,11 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
+import { slugify } from "@/lib/slug";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    const category = String(body.category || "Impressão 3D").trim() || "Impressão 3D";
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -17,7 +20,8 @@ export async function POST(req: Request) {
 
       stock: Number(body.stock || 0),
 
-      category: body.category || "Impressão 3D",
+      category,
+      categorySlug: slugify(category),
 
       material: body.material || "",
 

@@ -6,9 +6,10 @@ import AddToCartButton from "@/components/AddToCartButton";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_LOGO, STORE_CATEGORIES } from "@/lib/site";
+import { slugify } from "@/lib/slug";
 
 function getCategoryName(slug: string) {
-  const known = STORE_CATEGORIES.find((c) => c.slug === slug);
+  const known = STORE_CATEGORIES.find((c) => c.slug === slugify(decodeURIComponent(slug)));
   if (known) return known.name;
   return decodeURIComponent(slug)
     .replace(/-/g, " ")
@@ -63,17 +64,30 @@ async function getProductsByCategory(
   const client = await clientPromise;
   const db = client.db(DB_NAME);
 
+  // Normaliza o slug da URL ("Decoração", "decoracao", "decora%C3%A7%C3%A3o" -> "decoracao")
+  const target = slugify(decodeURIComponent(slug));
+  if (!target) return [];
+
+  // Produtos antigos podem não ter categorySlug (ou ter só o nome com acento),
+  // então buscamos pelos dois campos e comparamos o nome normalizado aqui.
   const products = await db
     .collection("products")
     .find({
-      category: slug.toLowerCase(),
+      $or: [
+        { categorySlug: target },
+        { category: { $exists: true, $nin: [null, ""] } },
+      ],
     })
     .sort({
       createdAt: -1,
     })
     .toArray();
 
-  return JSON.parse(JSON.stringify(products));
+  const matches = products.filter(
+    (p: any) => p.categorySlug === target || slugify(p.category) === target
+  );
+
+  return JSON.parse(JSON.stringify(matches));
 }
 
 export default async function CategoryPage({
@@ -83,9 +97,7 @@ export default async function CategoryPage({
 }) {
   const { slug } = await params;
 
-  const categoryName = slug
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+  const categoryName = getCategoryName(slug);
 
   const products = await getProductsByCategory(slug);
 

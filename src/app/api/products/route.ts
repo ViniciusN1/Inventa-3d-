@@ -1,4 +1,5 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
+import { slugify } from "@/lib/slug";
 
 export async function GET() {
   try {
@@ -58,13 +59,7 @@ export async function POST(req: Request) {
     const db = client.db(DB_NAME);
 
     // Gera automaticamente o slug da categoria
-    const categorySlug = (category || "Geral")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .trim();
+    const categorySlug = slugify(category || "Geral");
 
     const result = await db.collection("products").insertOne({
         name,

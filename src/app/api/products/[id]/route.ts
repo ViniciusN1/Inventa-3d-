@@ -1,5 +1,6 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { slugify } from "@/lib/slug";
 
 export async function PATCH(req: Request, context: any) {
   try {
@@ -19,7 +20,10 @@ export async function PATCH(req: Request, context: any) {
     if (body.image !== undefined) updateData.image = body.image;
     if (body.images !== undefined) updateData.images = body.images;
     if (body.stock !== undefined) updateData.stock = Number(body.stock);
-    if (body.category !== undefined) updateData.category = body.category;
+    if (body.category !== undefined) {
+      updateData.category = body.category;
+      updateData.categorySlug = slugify(body.category);
+    }
     if (body.material !== undefined) updateData.material = body.material;
     if (body.color !== undefined) updateData.color = body.color;
     if (body.dimensions !== undefined) updateData.dimensions = body.dimensions;
