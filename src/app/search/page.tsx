@@ -16,6 +16,15 @@ interface Product {
 }
 
 async function searchProducts(query: string): Promise<Product[]> {
+  try {
+    return await querySearch(query);
+  } catch (error) {
+    console.error("SEARCH PRODUCTS ERROR:", error);
+    return [];
+  }
+}
+
+async function querySearch(query: string): Promise<Product[]> {
   const client = await clientPromise;
 
   const db = client.db(DB_NAME);

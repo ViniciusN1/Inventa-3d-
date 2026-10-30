@@ -62,6 +62,15 @@ interface Product {
 async function getProductsByCategory(
   slug: string
 ): Promise<Product[]> {
+  try {
+    return await queryProductsByCategory(slug);
+  } catch (error) {
+    console.error("CATEGORY PRODUCTS ERROR:", error);
+    return [];
+  }
+}
+
+async function queryProductsByCategory(slug: string): Promise<Product[]> {
   const client = await clientPromise;
   const db = client.db(DB_NAME);
 
