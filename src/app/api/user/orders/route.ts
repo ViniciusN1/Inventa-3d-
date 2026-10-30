@@ -1,36 +1,30 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
-import jwt from "jsonwebtoken";
+import { getUserAccount, isAdminRequest, ordersFilterForUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
+/**
+ * Pedidos do cliente logado (Bearer token).
+ * Cliente vê só os próprios pedidos; admin (cookie) vê todos.
+ */
 export async function GET(req: Request) {
   try {
-    const auth = req.headers.get("authorization");
-    const token = auth?.replace("Bearer ", "");
+    const admin = isAdminRequest(req);
+    const user = admin ? null : await getUserAccount(req);
 
-    if (!token) {
-      return Response.json({
-        success: false,
-        orders: [],
-        error: "Token não enviado",
-      });
+    if (!admin && !user) {
+      return Response.json(
+        { success: false, orders: [], error: "Não autorizado" },
+        { status: 401 }
+      );
     }
-
-    const decoded: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    );
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
 
     const orders = await db
       .collection("orders")
-      .find({
-        "customer.email": decoded.email,
-      })
-      .sort({
-        createdAt: -1,
-      })
+      .find(admin ? {} : ordersFilterForUser(user))
+      .sort({ createdAt: -1 })
       .toArray();
 
     return Response.json({

@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -5,7 +6,10 @@ function toNumber(value: any) {
   return Number(value || 0);
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -32,6 +36,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
 

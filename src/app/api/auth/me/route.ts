@@ -48,14 +48,28 @@ export async function GET(
     const user =
       await db
         .collection("users")
-        .findOne({
+        .findOne(
+          {
+            _id:
+              new ObjectId(
+                decoded.userId
+              ),
+          },
+          {
+            // nunca devolver o hash da senha
+            projection: { password: 0 },
+          }
+        );
 
-          _id:
-            new ObjectId(
-              decoded.userId
-            ),
+    if (!user) {
 
-        });
+      return Response.json({
+
+        success: false,
+
+      });
+
+    }
 
     return Response.json({
 

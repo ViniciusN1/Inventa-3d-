@@ -1,7 +1,11 @@
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { slugify } from "@/lib/slug";
 
 export async function POST(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
 

@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { slugify } from "@/lib/slug";
 
 export async function PATCH(req: Request, context: any) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -57,6 +61,9 @@ export async function PATCH(req: Request, context: any) {
 }
 
 export async function DELETE(req: Request, context: any) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { id } = await context.params;
 

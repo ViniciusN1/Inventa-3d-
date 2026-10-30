@@ -4,25 +4,11 @@ import OrdersTable from "@/components/OrdersTable";
 export const dynamic = "force-dynamic";
 
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import jwt from "jsonwebtoken";
+import { isAdminSession } from "@/lib/auth";
 
 async function checkAdmin() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("admin_token")?.value;
-
-  if (!token) redirect("/admin/login");
-
-  try {
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-
-    if (decoded.role !== "admin") {
-      redirect("/admin/login");
-    }
-  } catch {
-    redirect("/admin/login");
-  }
+  if (!(await isAdminSession())) redirect("/admin/login");
 }
 
 async function getData() {

@@ -1,39 +1,24 @@
-import {
-  NextRequest,
-  NextResponse,
-} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import * as jwt from "jsonwebtoken";
+import { ADMIN_COOKIE, verifyAdminToken } from "@/lib/auth-token";
 
+/**
+ * Proteção das páginas /admin (Next.js 16 "proxy", antigo middleware).
+ * As APIs administrativas também checam a sessão admin dentro de cada rota
+ * (requireAdmin), então mesmo sem este proxy elas continuam protegidas.
+ */
 export function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
-  if (
-    pathname === "/admin/login" ||
-    pathname.startsWith("/api/admin-login")
-  ) {
+  if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
   if (pathname.startsWith("/admin")) {
-    const token =
-      req.cookies.get("admin_token")?.value;
+    const token = req.cookies.get(ADMIN_COOKIE)?.value;
 
-    if (!token) {
-      return NextResponse.redirect(
-        new URL("/admin/login", req.url)
-      );
-    }
-
-    try {
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET as string
-      );
-    } catch {
-      return NextResponse.redirect(
-        new URL("/admin/login", req.url)
-      );
+    if (!verifyAdminToken(token)) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
   }
 

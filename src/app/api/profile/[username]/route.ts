@@ -55,7 +55,16 @@ export async function GET(req: Request, context: any) {
 
     return Response.json({
       success: true,
-      user: JSON.parse(JSON.stringify(user)),
+      // perfil público: nunca expor e-mail, CPF, telefone, endereço etc.
+      user: {
+        _id: userId,
+        name: user.name || "",
+        username: user.username || "",
+        avatar: user.avatar || "",
+        bio: user.bio || "",
+        points: Number(user.points || 0),
+        createdAt: user.createdAt || null,
+      },
       posts: JSON.parse(JSON.stringify(posts)),
       stats: {
         posts: posts.length,

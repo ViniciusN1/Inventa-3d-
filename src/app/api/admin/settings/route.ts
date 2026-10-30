@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +62,9 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
 

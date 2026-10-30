@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { getUserFromRequest, isAdminRequest } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 cloudinary.config({
@@ -8,6 +9,15 @@ cloudinary.config({
 });
 
 export async function POST(req: Request) {
+  // Upload só para admin (cookie) ou cliente logado (Bearer token)
+  const admin = isAdminRequest(req);
+  if (!admin && !getUserFromRequest(req)) {
+    return Response.json(
+      { success: false, error: "Não autorizado" },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await req.json();
 
@@ -22,7 +32,8 @@ export async function POST(req: Request) {
 
     const result = await cloudinary.uploader.upload(file, {
       folder: "inventta3d/posts",
-      resource_type: "auto",
+      // clientes só enviam imagens; admin pode enviar vídeo também
+      resource_type: admin ? "auto" : "image",
     });
 
     return Response.json({

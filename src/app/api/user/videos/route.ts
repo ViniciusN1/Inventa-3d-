@@ -1,27 +1,17 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
-import jwt from "jsonwebtoken";
+import { getUserAccount, ordersFilterForUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    const auth = req.headers.get("authorization");
-    const token = auth?.replace("Bearer ", "");
+    const user = await getUserAccount(req);
 
-    if (!token) {
-      return Response.json({
-        success: false,
-        videos: [],
-      });
+    if (!user) {
+      return Response.json(
+        { success: false, videos: [] },
+        { status: 401 }
+      );
     }
-
-    const decoded: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    );
-
-    const email = String(decoded.email || "")
-      .toLowerCase()
-      .trim();
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
@@ -29,7 +19,7 @@ export async function GET(req: Request) {
     const orders = await db
       .collection("orders")
       .find({
-        "customer.email": email,
+        ...ordersFilterForUser(user),
         status: {
           $in: [
             "approved",
@@ -42,13 +32,13 @@ export async function GET(req: Request) {
       .toArray();
 
     const purchasedItems = orders.flatMap((order: any) =>
-      order.cart || []
+      order.cart || order.products || []
     );
 
     const productIds = [
       ...new Set(
         purchasedItems.map((item: any) =>
-          String(item._id)
+          String(item.productId || item._id)
         )
       ),
     ];
@@ -59,9 +49,9 @@ export async function GET(req: Request) {
       .collection("products")
       .find({
         _id: {
-          $in: productIds.map(
-            (id) => new ObjectId(id)
-          ),
+          $in: productIds
+            .filter((id) => ObjectId.isValid(String(id)))
+            .map((id) => new ObjectId(String(id))),
         },
         videoUrl: {
           $exists: true,

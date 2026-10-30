@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -60,6 +61,9 @@ export async function PUT(
   req: Request,
   context: RouteContext
 ) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -102,6 +106,9 @@ export async function DELETE(
   req: Request,
   context: RouteContext
 ) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { id } = await context.params;
 

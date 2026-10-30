@@ -1,48 +1,44 @@
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
-import jwt from "jsonwebtoken";
 import { ObjectId } from "mongodb";
+import { getUserAccount, isAdminRequest, ordersFilterForUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
-export async function GET(
-  req: Request,
-  context: any
-) {
+/** Um pedido: só se for do cliente logado (ou se for admin). */
+export async function GET(req: Request, context: any) {
   try {
-    const auth =
-      req.headers.get("authorization");
+    const admin = isAdminRequest(req);
+    const user = admin ? null : await getUserAccount(req);
 
-    const token =
-      auth?.replace("Bearer ", "");
-
-    if (!token) {
-      return Response.json({
-        success: false,
-        error: "Token não enviado",
-      });
+    if (!admin && !user) {
+      return Response.json(
+        { success: false, error: "Não autorizado" },
+        { status: 401 }
+      );
     }
 
-    const decoded: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    );
-
     const { id } = await context.params;
+
+    if (!ObjectId.isValid(String(id))) {
+      return Response.json(
+        { success: false, error: "Pedido não encontrado" },
+        { status: 404 }
+      );
+    }
 
     const client = await clientPromise;
     const db = client.db(DB_NAME);
 
-    const order = await db
-      .collection("orders")
-      .findOne({
-        _id: new ObjectId(id),
-        "customer.email": decoded.email,
-      });
+    const filter = admin
+      ? { _id: new ObjectId(String(id)) }
+      : { $and: [{ _id: new ObjectId(String(id)) }, ordersFilterForUser(user)] };
+
+    const order = await db.collection("orders").findOne(filter);
 
     if (!order) {
-      return Response.json({
-        success: false,
-        error: "Pedido não encontrado",
-      });
+      return Response.json(
+        { success: false, error: "Pedido não encontrado" },
+        { status: 404 }
+      );
     }
 
     return Response.json({

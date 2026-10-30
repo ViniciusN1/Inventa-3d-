@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -5,6 +6,9 @@ export async function PATCH(
   req: Request,
   context: any
 ) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const { id } = await context.params;
 

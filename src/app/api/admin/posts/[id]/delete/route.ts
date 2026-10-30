@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import clientPromise, { DB_NAME } from "@/lib/mongodb";
@@ -12,6 +13,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: RouteContext
 ) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
+
   try {
     const { id } = await params;
 

@@ -1,6 +1,10 @@
+import { requireAdmin } from "@/lib/auth";
 import { resend } from "@/lib/resend";
 
 export async function POST(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+
   try {
     const body = await req.json();
 
